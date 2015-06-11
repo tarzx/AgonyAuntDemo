@@ -1,4 +1,8 @@
-
+/** This class provide useful function for transform the question to interact with user
+ * 
+ * @author Patomporn Loungvara
+ *
+ */
 public class Transform {
 	private static int MAX_PARTIAL = 10;
 	private static String[][] mapSubject = { {"i", "i'm", "i'd", "my", "mine", "myself", "me"}, 

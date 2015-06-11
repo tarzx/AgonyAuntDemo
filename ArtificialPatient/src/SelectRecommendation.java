@@ -2,8 +2,12 @@ import java.util.ArrayList;
 import java.util.Random;
 
 
-
-public class SelectRecommedation {
+/** This class generates the recommendation from neural network output
+ * 
+ * @author Patomporn Loungvara
+ *
+ */
+public class SelectRecommendation {
 	
 	private Random rand;
 	private final double RATE = 0.1;
@@ -11,22 +15,25 @@ public class SelectRecommedation {
 	
 	private boolean isConnectServer = false;
 	
-	public SelectRecommedation(boolean isConnectServer) {
+	public SelectRecommendation(boolean isConnectServer) {
 		rand = new Random();
 		this.isConnectServer = isConnectServer;
 		if (this.isConnectServer) Util.loadNet();
 	}
 	
 	public int selectFrequency(int lastCtlLv, int age, boolean isMale) {
-		FrequencyInterventionNet fin = new FrequencyInterventionNet();
+		FrequencyInterventionNet fin = new FrequencyInterventionNet(this.isConnectServer);
 		
 		double[] freqRate = fin.getRate(lastCtlLv, age, isMale);
+		
+//		for (double freq : freqRate) System.out.print(freq + " ");
+//		System.out.println("");
 		
 		return fin.getFreq(getMaxRandomRate(freqRate));
 	}
 	
 	public ArrayList<Integer> selectTimeSlot(int lastCtlLv, int age, boolean isMale) {
-		TimeSlotInterventionNet tsin = new TimeSlotInterventionNet();
+		TimeSlotInterventionNet tsin = new TimeSlotInterventionNet(this.isConnectServer);
 		
 		double[] slotRate = tsin.getRate(lastCtlLv, age, isMale);
 		
@@ -40,7 +47,7 @@ public class SelectRecommedation {
 	}
 	
 	public int selectSequence(int ctlLv, int age, boolean isMale) {
-		SelectSequenceNet ssq = new SelectSequenceNet();
+		SelectSequenceNet ssq = new SelectSequenceNet(this.isConnectServer);
 		
 		double[] seqRate = ssq.getRate(ctlLv, age, isMale);
 
@@ -48,7 +55,7 @@ public class SelectRecommedation {
 	}
 	
 	public int selectReplayGoal(int ctlLv, int age, boolean isMale, int prevGroup) {
-		SelectGQGoalNet sgqg = new SelectGQGoalNet();
+		SelectGQGoalNet sgqg = new SelectGQGoalNet(this.isConnectServer);
 		
 		double[] rateGQGoal = sgqg.getRate(ctlLv, age, isMale, prevGroup);
 		
@@ -56,7 +63,7 @@ public class SelectRecommedation {
 	}
 	
 	public int selectReflectBehaviour(int ctlLv, int age, boolean isMale, int prevGroup) {
-		SelectGQBehaviourNet sgqb = new SelectGQBehaviourNet();
+		SelectGQBehaviourNet sgqb = new SelectGQBehaviourNet(this.isConnectServer);
 		
 		double[] rateGQBehaviour = sgqb.getRate(ctlLv, age, isMale, prevGroup);
 		

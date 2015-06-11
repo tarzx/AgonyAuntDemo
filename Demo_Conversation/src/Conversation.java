@@ -4,6 +4,12 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Scanner;
 
+
+/** This class generates the demo of conversation
+ * 
+ * @author Patomporn Loungvara
+ *
+ */
 public class Conversation {
 	public static void main(String[] args) {
 		int lastCtlLv = 1;
@@ -23,7 +29,7 @@ public class Conversation {
     	}
     	
     	GroupQuestion gq = new GroupQuestion();
-		SelectRecommedation sr = new SelectRecommedation(isConnectServer);		
+		SelectRecommendation sr = new SelectRecommendation(isConnectServer);		
 		System.out.println("---------------------------------------------------");
 		while (true) {
 			StringBuilder sb = new StringBuilder();
@@ -40,21 +46,27 @@ public class Conversation {
         		ArrayList<Integer> slots;
         		int freq;
         		if (isConnectServer) {
+        			// get patients' info 
         			HashMap<String, String> patient = selectPatient(keyboard);
         			System.out.println("Patient:" + Util.getStringPatirntInfo(patient));
                 	if (patient != null) {
         				age = Integer.parseInt(patient.get(Util.TAG_AGE));
         				isMale = (patient.get(Util.TAG_GENDER).equals("0"));
         				
+        				// get selected patient's preference
         				HashMap<String, String> preference = Util.getPatientPreference(patient.get(Util.TAG_PID), lastCtlLv);
         				if (patient.get(Util.TAG_SET_FREQ).equals("1")) {
-        			        freq = Util.getFrequency(preference);
+        			        // patient sets his/her own frequency intervention
+        					freq = Util.getFrequency(preference);
         				} else {
+        					// select recommended frequency intervention from neural network
 		        			freq = sr.selectFrequency(lastCtlLv, age, isMale);
 	        			}
         				if (patient.get(Util.TAG_SET_SLOT).equals("1")) {
-        			        slots = Util.getSlots(preference);
+        					// patient sets his/her own slots intervention
+        					slots = Util.getSlots(preference);
         				} else {
+        					// select recommended slot intervention from neural network
 		        			slots = sr.selectTimeSlot(lastCtlLv, age, isMale);
 	        			}
 	        			printIntervention(slots, freq);
@@ -64,26 +76,29 @@ public class Conversation {
 	        			System.out.println("---------------------------------------------------");
 	        			
 	        			int preCtlLv = getControlLevel(keyboard, gq, true);
+	        			// get recommended sequence of question
 		        		int seq = sr.selectSequence(preCtlLv, age, isMale);
 		        		SequenceQuestion seqQ;
 		        		if (mode=='2') {
+		        			// transcript mode
 		        			seqQ = getTranscript(gq, seq, sr, preCtlLv, age, isMale);
 		        		} else {
+		        			// chat mode
 		        			seqQ = startChatting(sc, gq, seq, sr, preCtlLv, age, isMale);
 		        		}
-		        		int postCtlLv = getControlLevel(keyboard, gq, true);
+		        		int postCtlLv = getControlLevel(keyboard, gq, false);
 		        		
 		        		//Get Feedback
 		        		recordControlLevel(patient.get(Util.TAG_PID), seq, preCtlLv, postCtlLv);
-		        		SeqRespond(sc, gq, seqQ, patient.get(Util.TAG_PID), preCtlLv);
+		        		SeqRespond(keyboard, gq, seqQ, patient.get(Util.TAG_PID), preCtlLv);
 		        		
 		        		boolean isStart = true;
 		        		if (!patient.get(Util.TAG_SET_SLOT).equals("1") && !slots.isEmpty()) { 
-		        			slotFeedbackRespond(sc, gq, patient.get(Util.TAG_PID), preCtlLv, slots.get(0), isStart);
+		        			slotFeedbackRespond(keyboard, gq, patient.get(Util.TAG_PID), preCtlLv, slots.get(0), isStart);
 		        			isStart = false;
 		        		}
 		        		if (!patient.get(Util.TAG_SET_FREQ).equals("1") && freq!=0) { 
-		        			freqFeedbackRespond(sc, gq, patient.get(Util.TAG_PID), preCtlLv, freq, isStart); 
+		        			freqFeedbackRespond(keyboard, gq, patient.get(Util.TAG_PID), preCtlLv, freq, isStart); 
 		        		}
 		        		
 		        		System.out.println("---------------------------------------------------");
@@ -100,21 +115,27 @@ public class Conversation {
         			printIntervention(slots, freq);
         			
         			System.out.println("---------------------------------------------------");
-        			System.out.println("Start Converastion");
+        			System.out.println("Start Converastion [ Offline Mode: Patient's age: " + age + " (" + (isMale?"Male":"Female") + ") ]");
         			System.out.println("---------------------------------------------------");
         			
         			int preCtlLv = getControlLevel(keyboard, gq, true);
-	        		int seq = sr.selectSequence(preCtlLv, age, isMale);
+	        		// select recommended sequence of question
+        			int seq = sr.selectSequence(preCtlLv, age, isMale);
 	        		SequenceQuestion seqQ;
 	        		if (mode=='2') {
+	        			// transcript mode
 	        			seqQ = getTranscript(gq, seq, sr, preCtlLv, age, isMale);
 	        		} else {
+	        			// chat mode
 	        			seqQ = startChatting(sc, gq, seq, sr, preCtlLv, age, isMale);
 	        		}
-	        		int postCtlLv = getControlLevel(keyboard, gq, true);
+	        		int postCtlLv = getControlLevel(keyboard, gq, false);
 	        		//Get Feedback
 	        		recordControlLevel("", seq, preCtlLv, postCtlLv);
-	        		SeqRespond(sc, gq, seqQ, "", preCtlLv);
+	        		SeqRespond(keyboard, gq, seqQ, "", preCtlLv);
+	        		
+	        		slotFeedbackRespond(keyboard, gq, "", preCtlLv, slots.get(0), true);
+	        		freqFeedbackRespond(keyboard, gq, "", preCtlLv, freq, false); 
 	        		
 	        		System.out.println("---------------------------------------------------");
         			System.out.println("Thank you for your attention!");
@@ -122,13 +143,17 @@ public class Conversation {
         			
 	        		lastCtlLv = preCtlLv;
         		}
-        	} else if (mode=='3') {
+        	} else if (mode=='3' && isConnectServer) {
         		Util.trainNet();
         		Util.loadNet();
         	}
     	}
 	}
 	
+	/** Retrieve all patients' information
+	 * 
+	 * @return			patient list
+	 */
 	private static HashMap<String, String> selectPatient(BufferedReader keyboard) {
 		int n = 0;
 		StringBuilder sb = new StringBuilder();
@@ -153,6 +178,11 @@ public class Conversation {
 		}
 	}
 	
+	/** Print intervention 
+	 * 
+	 * @param	slots		slots intervention
+	 * @param	freq		frequency intervention
+	 */
 	private static void printIntervention(ArrayList<Integer> slots, int freq) {
 		StringBuilder sb = new StringBuilder();
 		sb.append("Slot: ");
@@ -163,6 +193,10 @@ public class Conversation {
 		System.out.println(sb.toString());
 	}
 	
+	/** Get user's control level
+	 * 
+	 * @return			control level
+	 */
 	private static int getControlLevel(BufferedReader keyboard, GroupQuestion gq, boolean isPre) {
 		if (isPre) {
 			System.out.println(gq.getPreControl());
@@ -171,12 +205,12 @@ public class Conversation {
 		}
 		try {
 			String lv = keyboard.readLine();
-			if (Integer.valueOf(lv) > 0 && Integer.valueOf(lv) <= 20) {
+			if (Integer.valueOf(lv) >= Util.MIN_CTRL && Integer.valueOf(lv) <= Util.MAX_CTRL) {
 				return Integer.valueOf(lv);
-			} else if (Integer.valueOf(lv) <= 0) {
-				return 1;
+			} else if (Integer.valueOf(lv) < Util.MIN_CTRL) {
+				return Util.MIN_CTRL;
 			} else {
-				return 20;
+				return Util.MAX_CTRL;
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -184,8 +218,11 @@ public class Conversation {
 		}
 	}
 	
+	/** Chat mode
+	 * 
+	 */
 	private static SequenceQuestion startChatting(Scanner sc, GroupQuestion gq, int seq,
-		SelectRecommedation sr, int ctlLv, int age, boolean isMale) {
+		SelectRecommendation sr, int ctlLv, int age, boolean isMale) {
 		InputStreamReader in = new InputStreamReader(System.in);
 		BufferedReader keyboard = new BufferedReader(in);
 		SequenceQuestion seqQ = new SequenceQuestion();
@@ -273,7 +310,7 @@ public class Conversation {
 					seqQ.setAnswer(answer);
 					
 					q5 = gq.getGroup3OR4(sr, ctlLv, age, isMale, q4.getGroup(), target_thought, "", true, false);
-					System.out.println("C: " + q4);
+					System.out.println("C: " + q5);
 					System.out.print("P: " + q5.getAnswerPrefix());
 					target_goal = keyboard.readLine();
 					seqQ.setQuestion(q5); 
@@ -568,8 +605,11 @@ public class Conversation {
 		return seqQ;
 	}
 	
+	/** Transcript mode
+	 * 
+	 */
 	private static SequenceQuestion getTranscript(GroupQuestion gq, int seq,
-			SelectRecommedation sr, int ctlLv, int age, boolean isMale) {
+			SelectRecommendation sr, int ctlLv, int age, boolean isMale) {
 			SequenceQuestion seqQ = new SequenceQuestion();
 			Question q1, q2, q3, q4, q5, q6;
 			String answer = "";
@@ -654,7 +694,7 @@ public class Conversation {
 				seqQ.setAnswer(answer);
 				
 				q5 = gq.getGroup3OR4(sr, ctlLv, age, isMale, q4.getGroup(), target_thought, "", true, false);
-				System.out.println("C: " + q4);
+				System.out.println("C: " + q5);
 				target_goal = "my grade and whether I graduate.";
 				System.out.println("P: " + q5.getAnswerPrefix() + target_goal);
 				seqQ.setQuestion(q5); 
@@ -945,12 +985,15 @@ public class Conversation {
 		return seqQ;
 	}
 
-	private static void SeqRespond(Scanner sc, GroupQuestion gq, SequenceQuestion seqQ, String pid, int preCtlLv) {
+	/** get feedback for ambiguous group question
+	 * 
+	 */
+	private static void SeqRespond(BufferedReader keyboard, GroupQuestion gq, SequenceQuestion seqQ, String pid, int preCtlLv) {
 		boolean isFirst = true;
 		for (int i=2; i<seqQ.getQNo()+1; i++) {
-			if (seqQ.getQuestion(i).isAmbiguious()) {
+			if (seqQ.getQuestion(i).isAmbiguous()) {
 				System.out.println(gq.getAmbiguous(seqQ.getQuestion(i-1).getQuestion(), seqQ.getQuestion(i).getQuestion(), isFirst));
-				double rate = getLikeRate(sc);
+				double rate = getLikeRate(keyboard);
 				
 				recordGroupQuestion(pid, preCtlLv, seqQ.getQuestion(i-1).getGroup(), seqQ.getQuestion(i).getGroup(), rate);
 				isFirst = false;
@@ -958,47 +1001,74 @@ public class Conversation {
 		}
 	}
 
-	private static void freqFeedbackRespond(Scanner sc, GroupQuestion gq, String pid, int preCtlLv, int freq, boolean isStart) {
+	/** get feedback for frequency intervention
+	 * 
+	 */
+	private static void freqFeedbackRespond(BufferedReader keyboard, GroupQuestion gq, String pid, int preCtlLv, int freq, boolean isStart) {
 		System.out.println(gq.getIntvention(false, isStart));
-		double freqRate = getLikeRate(sc);
-		//Record Data
-		Util.recordFrequency(pid, preCtlLv, freq, freqRate);
+		double freqRate = getLikeRate(keyboard);
+		if (!pid.equals("")) {
+			//Record Data
+			Util.recordFrequency(pid, preCtlLv, freq, freqRate);
+		}
 	}
 	
-	private static void slotFeedbackRespond(Scanner sc, GroupQuestion gq, String pid, int preCtlLv, int slot, boolean isStart) {
+	/** get feedback for slots intervention
+	 * 
+	 */
+	private static void slotFeedbackRespond(BufferedReader keyboard, GroupQuestion gq, String pid, int preCtlLv, int slot, boolean isStart) {
 		System.out.println(gq.getIntvention(true, isStart));
-		double slotRate = getLikeRate(sc);
-		//Record Data
-		Util.recordSlot(pid, preCtlLv, slot, slotRate);
+		double slotRate = getLikeRate(keyboard);
+		if (!pid.equals("")) {
+			//Record Data
+			Util.recordSlot(pid, preCtlLv, slot, slotRate);
+		}
 	}
 	
-	private static double getLikeRate(Scanner sc) {
-		double rate = 0.0;
+	/** get feedback rate
+	 * 
+	 * @return	rate
+	 */
+	private static double getLikeRate(BufferedReader keyboard) {
 		try {
-			char lv = sc.next().charAt(0);
-			if (lv=='1') {
-				rate = 1.0;
-			} else if (lv=='2') {
-				rate = 0.5;
+			String lv = keyboard.readLine();
+			if (Integer.valueOf(lv) >= Util.MIN_RATE && Integer.valueOf(lv) <= Util.MAX_RATE) {
+				return Integer.valueOf(lv)/(Util.MAX_RATE-Util.MIN_RATE);
+			} else if (Integer.valueOf(lv) <= Util.MIN_RATE) {
+				return 0.0;
 			} else {
-				rate = 0.0;
+				return 1.0;
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
+			return 0.0;
 		}
-		
-		return rate;
 	}
 	
+	/** record feedback for ambiguous group question
+	 * 
+	 */
 	private static void recordGroupQuestion(String pid, int preCtlLv, int prevG, int GQ, double rate) {
 		if (!pid.equals("")) {
 			Util.recordSelectGroupQuestion(pid, preCtlLv, prevG, GQ, rate);
 		}
 	}
 	
+	/** get feedback for sequence of question
+	 * 
+	 */
 	private static void recordControlLevel(String pid, int seq, int preCtlLv, int postCtlLv) {
 		if (!pid.equals("")) {
-	        Util.recordSelectSequence(pid, seq, preCtlLv, (preCtlLv>postCtlLv?0:preCtlLv<postCtlLv?1:0.5));
+			double rate;
+            if (preCtlLv<postCtlLv) {
+                rate = ((double) preCtlLv-Util.MIN_RATE/postCtlLv-Util.MIN_RATE) * 0.5;
+            } else {
+                rate = 0.5;
+                if (preCtlLv!=Util.MAX_RATE) {
+                    rate += ((((double) postCtlLv-preCtlLv)/(Util.MAX_RATE-preCtlLv)) * 0.5);
+                }
+            }
+	        Util.recordSelectSequence(pid, seq, preCtlLv, rate);
 		}
 	}
 

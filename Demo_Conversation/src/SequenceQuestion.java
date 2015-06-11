@@ -1,6 +1,10 @@
 import java.util.ArrayList;
 
-
+/** This class generates the sequence of question
+ * 
+ * @author Patomporn Loungvara
+ *
+ */
 public class SequenceQuestion {
 	private ArrayList<Question> qList;
 	private ArrayList<String> aList;

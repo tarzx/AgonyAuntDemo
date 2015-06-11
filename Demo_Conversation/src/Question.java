@@ -1,4 +1,8 @@
-
+/** This class generates the individual question
+ * 
+ * @author Patomporn Loungvara
+ *
+ */
 public class Question {
 	private int _questionGroup;
 	private int _prevGroup;
@@ -17,7 +21,7 @@ public class Question {
 	private String _link = "";
 	private boolean _isEcho;
 	private boolean _isChangeTopic;
-	private boolean _isAmbiguious;
+	private boolean _isAmbiguous;
 	private boolean _isDefined;
 	
 	public Question(int group, String question) {
@@ -35,11 +39,11 @@ public class Question {
 		this._prevGroup = prevGroup;
 	}
 	
-	public void setIsAmbiguious(boolean isAmbiguious) {
-		this._isAmbiguious = isAmbiguious;
+	public void setIsAmbiguous(boolean isAmbiguous) {
+		this._isAmbiguous = isAmbiguous;
 	}
-	public boolean isAmbiguious() {
-		return this._isAmbiguious;
+	public boolean isAmbiguous() {
+		return this._isAmbiguous;
 	}
 	
 	public String getAnswerPrefix() {

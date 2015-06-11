@@ -23,9 +23,13 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
 
-
+/** This class provide useful function for demo
+ * 
+ * @author Patomporn Loungvara
+ *
+ */
 public class Util {
-	private static final String url_host = "http://pl44.host.cs.st-andrews.ac.uk/AndroidApp/";
+	private static final String url_host = "http://pl44.host.cs.st-andrews.ac.uk/AndroidApp/v2/";
 
     // URL list
     public static final String url_all_patients_info = url_host + "get_all_patients_info.php";
@@ -79,12 +83,20 @@ public class Util {
     public static final String TAG_FREQ2 = "frequency2";
     public static final String TAG_FREQ3 = "frequency3";
     public static final String TAG_FREQ4 = "frequency4";
+    public static final String TAG_FREQ5 = "frequency5";
+    public static final String TAG_FREQ6 = "frequency6";
+    public static final String TAG_FREQ7 = "frequency7";
     public static final String TAG_SLOT1 = "slot1";
     public static final String TAG_SLOT2 = "slot2";
     public static final String TAG_SLOT3 = "slot3";
     public static final String TAG_SLOT4 = "slot4";
     public static final String TAG_SLOT5 = "slot5";
     public static final String TAG_SLOT6 = "slot6";
+    
+    public static final int MIN_RATE = 0;
+    public static final int MAX_RATE = 20;
+    public static final int MIN_CTRL = 1;
+    public static final int MAX_CTRL = 20;
         
     public static String getStringPatirntInfo(HashMap<String, String> patient) {
 		StringBuilder sb = new StringBuilder();
@@ -128,7 +140,10 @@ public class Util {
 		if (preference.get(TAG_FREQ1).equals("1")) freq = 1;
 		else if (preference.get(TAG_FREQ2).equals("1")) freq = 2;
 		else if (preference.get(TAG_FREQ3).equals("1")) freq = 3;
-		else freq = 4;
+		else if (preference.get(TAG_FREQ4).equals("1")) freq = 4;
+		else if (preference.get(TAG_FREQ5).equals("1")) freq = 5;
+		else if (preference.get(TAG_FREQ6).equals("1")) freq = 6;
+		else freq = 7;
 		return freq;
 	}
 	
@@ -275,6 +290,9 @@ public class Util {
                     String freq2 = (c.get(TAG_FREQ2).isJsonNull()?"":c.get(TAG_FREQ2).getAsString());
                     String freq3 = (c.get(TAG_FREQ3).isJsonNull()?"":c.get(TAG_FREQ3).getAsString());
                     String freq4 = (c.get(TAG_FREQ4).isJsonNull()?"":c.get(TAG_FREQ4).getAsString());
+                    String freq5 = (c.get(TAG_FREQ5).isJsonNull()?"":c.get(TAG_FREQ5).getAsString());
+                    String freq6 = (c.get(TAG_FREQ6).isJsonNull()?"":c.get(TAG_FREQ6).getAsString());
+                    String freq7 = (c.get(TAG_FREQ7).isJsonNull()?"":c.get(TAG_FREQ7).getAsString());
                     String slot1 = (c.get(TAG_SLOT1).isJsonNull()?"":c.get(TAG_SLOT1).getAsString());
                     String slot2 = (c.get(TAG_SLOT2).isJsonNull()?"":c.get(TAG_SLOT2).getAsString());
                     String slot3 = (c.get(TAG_SLOT3).isJsonNull()?"":c.get(TAG_SLOT3).getAsString());
@@ -291,6 +309,9 @@ public class Util {
                     preference.put(TAG_FREQ2, freq2);
                     preference.put(TAG_FREQ3, freq3);
                     preference.put(TAG_FREQ4, freq4);
+                    preference.put(TAG_FREQ5, freq5);
+                    preference.put(TAG_FREQ6, freq6);
+                    preference.put(TAG_FREQ7, freq7);
                     preference.put(TAG_SLOT1, slot1);
                     preference.put(TAG_SLOT2, slot2);
                     preference.put(TAG_SLOT3, slot3);
@@ -315,6 +336,9 @@ public class Util {
         	case 2: params.put(TAG_FREQ2, String.valueOf(rate)); break;
         	case 3: params.put(TAG_FREQ3, String.valueOf(rate)); break;
         	case 4: params.put(TAG_FREQ4, String.valueOf(rate)); break;
+        	case 5: params.put(TAG_FREQ5, String.valueOf(rate)); break;
+        	case 6: params.put(TAG_FREQ6, String.valueOf(rate)); break;
+        	case 7: params.put(TAG_FREQ7, String.valueOf(rate)); break;
         	default: break;
         }
         

@@ -1,6 +1,10 @@
 import java.util.Random;
 
-
+/** This class generates the question for each group
+ * 
+ * @author Patomporn Loungvara
+ *
+ */
 public class GroupQuestion {
 	//Target
 	private final String target_thought = "your thought";
@@ -120,7 +124,7 @@ public class GroupQuestion {
 	//Group 10-1
 	private final String[] g101 = { "Where's your life at just now?" };
 	//Group 10-2
-	private final String[] g102 = { " How do you feel about that?" };
+	private final String[] g102 = { "How do you feel about that?" };
 	
 	//Group 11-1
 	private final String[] g111 = { "What’s sitting at the front of your mind just now?",
@@ -157,12 +161,11 @@ public class GroupQuestion {
 	private final String preControl = "To what extent do you feel you are in control of your life recently?\n";
 	private final String postControl = "After answering the question, I hope you feel better.\n"
 			+ "So, let us check again. To what extent do you feel you are in control of your life now?\n";
-	private final String controlChoice = "Rate from 1 (Not at all) to 20 (To a large extent)";
+	private final String controlChoice = "Rate from " + String.valueOf(Util.MIN_CTRL) + " (Not at all) to "
+			+ String.valueOf(Util.MAX_CTRL)+ " (To a large extent)";
 	
 	//Response
-	private String likeChoice = "(1) Like\n"
-			+ "(2) Neutral\n"
-			+ "(3) Unlike";
+	private String likeChoice = "Rate from " + String.valueOf(Util.MIN_RATE) + " (Unlike) to " + String.valueOf(Util.MAX_RATE) + " (Like)";
 	
 	//Ambiguous
 	private String ambPreQuestion = "Now I would like to ask you about your likes and dislikes about the series of question.\n";
@@ -204,13 +207,13 @@ public class GroupQuestion {
 	public Question getQuestionG3(int prevGroup, String prevAns, String echoAns, boolean isChangeTopic, boolean isEcho, boolean isAmbiguious) {
 		int n = getRandom(g3.length);
 		Question q = new Question(30, g3[n]);
-		q.setIsAmbiguious(isAmbiguious);
+		q.setIsAmbiguous(isAmbiguious);
 		q.setPrevGroup(prevGroup);
 		q.setAnswerPrefix(g3_prefix[n]);
 		q.setIsChangeTopic(isChangeTopic);
 		q.setChangeTopic(change_topic[getRandom(change_topic.length)]);
 		q.setDefaultTopic(change_topic_default);
-		q.setTarget(target_thought);
+		q.setTarget(target_goal);
 		q.setIsEcho(isEcho);
 		q.setEcho(echo[getRandom(echo.length)]);
 		q.setPrevEcho(echoAns);
@@ -222,13 +225,13 @@ public class GroupQuestion {
 	public Question getQuestionG4(int prevGroup, String prevAns, String echoAns, boolean isChangeTopic, boolean isEcho, boolean isAmbiguious) {
 		int n = getRandom(g4.length);
 		Question q = new Question(40, g4[n]);
-		q.setIsAmbiguious(isAmbiguious);
+		q.setIsAmbiguous(isAmbiguious);
 		q.setPrevGroup(prevGroup);
 		q.setAnswerPrefix(g4_prefix[n]);
 		q.setIsChangeTopic(isChangeTopic);
 		q.setChangeTopic(change_topic[getRandom(change_topic.length)]);
 		q.setDefaultTopic(change_topic_default);
-		q.setTarget(target_thought);
+		q.setTarget(target_goal);
 		q.setIsEcho(isEcho);
 		q.setEcho(echo[getRandom(echo.length)]);
 		q.setPrevEcho(echoAns);
@@ -271,7 +274,7 @@ public class GroupQuestion {
 		q.setIsChangeTopic(isChangeTopic);
 		q.setChangeTopic(change_topic[getRandom(change_topic.length)]);
 		q.setDefaultTopic(change_topic_default);
-		q.setTarget(target_goal);
+		q.setTarget(target_thought);
 		q.setPrevAnswer(prevAns);
 		
 		Question qs = new Question(72, g72[n]);
@@ -289,7 +292,7 @@ public class GroupQuestion {
 		q.setIsChangeTopic(isChangeTopic);
 		q.setChangeTopic(change_topic[getRandom(change_topic.length)]);
 		q.setDefaultTopic(change_topic_default);
-		q.setTarget(target_thought);
+		q.setTarget(target_goal);
 		q.setIsEcho(isEcho);
 		q.setEcho(echo[getRandom(echo.length)]);
 		q.setPrevEcho(echoAns);
@@ -320,7 +323,7 @@ public class GroupQuestion {
 	public Question getQuestionG10(int prevGroup, String echoAns, boolean isEcho, boolean isAmbiguous) {
 		int n = getRandom(g101.length);
 		Question q = new Question(101, g101[n]);
-		q.setIsAmbiguious(isAmbiguous);
+		q.setIsAmbiguous(isAmbiguous);
 		q.setPrevGroup(prevGroup);
 		q.setIsEcho(isEcho);
 		q.setEcho(echo[getRandom(echo.length)]);
@@ -337,7 +340,7 @@ public class GroupQuestion {
 	public Question getQuestionG11(int prevGroup, String echoAns, boolean isEcho, boolean isAmbiguous) {
 		int n = getRandom(g111.length);
 		Question q = new Question(111, g111[n]);
-		q.setIsAmbiguious(isAmbiguous);
+		q.setIsAmbiguous(isAmbiguous);
 		q.setPrevGroup(prevGroup);
 		q.setIsEcho(isEcho);
 		q.setEcho(echo[getRandom(echo.length)]);
@@ -374,7 +377,7 @@ public class GroupQuestion {
 		return rand.nextInt(length);
 	}
 	
-	public Question getGroup3OR4(SelectRecommedation sgq, int ctlLv, int age, boolean isMale, int prevGroup, 
+	public Question getGroup3OR4(SelectRecommendation sgq, int ctlLv, int age, boolean isMale, int prevGroup, 
 								 String prevAns, String echoAns, boolean isChangeTopic, boolean isEcho) {
 		int group = sgq.selectReplayGoal(ctlLv, age, isMale, prevGroup);
 		if (group==3) {
@@ -384,7 +387,7 @@ public class GroupQuestion {
 		}
 	}
 	
-	public Question getGroup10OR11(SelectRecommedation sgq, int ctlLv, int age, boolean isMale, int prevGroup, 
+	public Question getGroup10OR11(SelectRecommendation sgq, int ctlLv, int age, boolean isMale, int prevGroup, 
 								   String echoAns, boolean isEcho) {
 		int group = sgq.selectReflectBehaviour(ctlLv, age, isMale, prevGroup);
 		if (group==10) {
